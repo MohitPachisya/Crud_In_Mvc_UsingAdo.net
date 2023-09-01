@@ -1,0 +1,127 @@
+﻿
+@{
+    ViewBag.Title = "RegistrationForm";
+}
+
+<h2>RegistrationForm</h2>
+<form action="" method="get" class="form-example">
+    <div class="form-example">
+        <label for="name">Name</label>
+        <input type="text" id="txtname" />
+    </div>
+    <div class="form-example">
+        <label for="City">City</label>
+        <input type="text" id="txtCity" />
+    </div>
+    <div class="form-example">
+
+        <label for="txtage">Age</label>
+        <input type="text" id="txtAge" />
+    </div>
+    <input type="button" id="btnsave" value="Save" onclick="Save()" />
+</form>
+<table id="tbl" border="1" style="background-color:cornflowerblue;color:white;width:600px">
+    <tr style="background-color:forestgreen">
+        <td>Id</td>
+        <td>Name</td>
+        <td>City</td>
+        <td>Age</td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        Show();
+    });
+    var Idd = 0;
+
+    function Save() {
+        if ($("#btnsave").val() == "Save") {
+            $.ajax({
+                url: 'Reg/PostData',
+                type: 'post',
+                data: { Name: $("#txtname").val(), City: $("#txtCity").val(), Age: $("#txtAge").val() },
+                success: function () {
+                    Show();
+                    BLANK();
+                },
+                error: function () {
+                    alert("Data Not Save!!")
+                }
+            });
+        }
+        else {
+            $.ajax({
+                url: 'Reg/UpdateById',
+                type: 'post',
+                data: { Id: Idd, Name: $("#txtname").val(), City: $("#txtCity").val(), Age: $("#txtAge").val() },
+                success: function () {
+                    Show();
+                    BLANK();
+                },
+                error: function () {
+                    alert("Data Not Save!!")
+                }
+            });
+        }
+    }
+    function Show() {
+        $.ajax({
+            url: 'Reg/GetItemData',
+            type: 'post',
+            data: {},
+            success: function (pp) {
+                pp = JSON.parse(pp);
+                $("#tbl").find("tr:gt(0)").remove();
+                for (var i = 0; i < pp.length; i++) {
+                    $("#tbl").append('<tr><td>' + pp[i].Id + '</td> <td>' + pp[i].Name + '</td> <td>' + pp[i].City + '</td> <td>' + pp[i].Age + '</td> <td><input color="red" type="button" id="btnEdit" value="Edit" onclick="EDIT(' + pp[i].Id + ')" /></td> <td><input  type="button" id="btndelete" value="Delete" onclick="DELETE(' + pp[i].Id + ')" /></td> </tr>')
+                }
+
+            },
+            error: function () {
+                alert("Data Not Save!!")
+            }
+        });
+    }
+    function EDIT(Id) {
+        $.ajax({
+            url: 'Reg/GetbyId',
+            type: 'post',
+            data: { Id: Id },
+            success: function (pp) {
+                pp = JSON.parse(pp);
+                $("#txtname").val(pp[0].Name);
+                $("#txtCity").val(pp[0].City);
+                $("#txtAge").val(pp[0].Age);
+                $("#btnsave").val("Update");
+                Idd = Id;
+            },
+            error: function () {
+                alert("Data Not Edited")
+
+            }
+        });
+    }
+    function DELETE(Id) {
+        $.ajax({
+            url: 'Reg/DeleteById',
+            type: 'post',
+            data: { Id: Id },
+            success: function () {
+                Show();
+            },
+            error: function () {
+                alert("Data Not Delete!!");
+            }
+        });
+    }
+    function BLANK() {
+        $("#txtname").val("");
+        $("#txtCity").val("");
+        $("#txtAge").val("");
+        $("#btnsave").val("Save");
+        Idd = 0;
+    }
+</script>
